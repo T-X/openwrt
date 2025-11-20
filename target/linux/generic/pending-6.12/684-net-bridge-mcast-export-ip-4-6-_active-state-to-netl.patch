@@ -1,4 +1,4 @@
-From 2e4e421eca419ca046e938cebd84315c35ade15b Mon Sep 17 00:00:00 2001
+From 88789e5930673f2646caaa70f60e9320a0412945 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sun, 13 Apr 2025 23:56:23 +0200
 Subject: [PATCH] net: bridge: mcast: export ip{4,6}_active state to netlink
@@ -16,7 +16,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/bridge/br_netlink.c        | 16 +++++++++++++++-
  net/bridge/br_private.h        |  2 +-
  net/bridge/br_vlan_options.c   | 22 ++++++++++++++++++++--
- 5 files changed, 50 insertions(+), 4 deletions(-)
+ net/core/rtnetlink.c           |  2 +-
+ 6 files changed, 51 insertions(+), 5 deletions(-)
 
 --- a/include/uapi/linux/if_bridge.h
 +++ b/include/uapi/linux/if_bridge.h
@@ -185,3 +186,17 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	[BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_CNT]	= { .type = NLA_U32 },
  	[BRIDGE_VLANDB_GOPTS_MCAST_STARTUP_QUERY_CNT]	= { .type = NLA_U32 },
  	[BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_INTVL]	= { .type = NLA_U64 },
+--- a/net/core/rtnetlink.c
++++ b/net/core/rtnetlink.c
+@@ -61,7 +61,7 @@
+ 
+ #include "dev.h"
+ 
+-#define RTNL_MAX_TYPE		50
++#define RTNL_MAX_TYPE		52
+ #define RTNL_SLAVE_MAX_TYPE	44
+ 
+ struct rtnl_link {
+-- 
+2.51.0
+
