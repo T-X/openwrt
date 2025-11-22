@@ -1,4 +1,4 @@
-From 08e6b5b920d3456d5d570feba6eff86e714ef2e3 Mon Sep 17 00:00:00 2001
+From 8d7dcba379c00e8501c17a188f0df86f9eef6817 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sun, 13 Apr 2025 18:30:38 +0200
 Subject: [PATCH] bridge: mcast: add mcast_active_v4 / mcast_active_v6 output
@@ -20,10 +20,10 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  4 files changed, 26 insertions(+)
 
 diff --git a/bridge/vlan.c b/bridge/vlan.c
-index ea4aff931a22..df01269b1954 100644
+index 3c240207028b..d0b6afdee49d 100644
 --- a/bridge/vlan.c
 +++ b/bridge/vlan.c
-@@ -955,6 +955,16 @@ static void print_vlan_global_opts(struct rtattr *a, int ifindex)
+@@ -920,6 +920,16 @@ static void print_vlan_global_opts(struct rtattr *a, int ifindex)
  		print_uint(PRINT_ANY, "msti", "msti %u ",
  			   rta_getattr_u16(vattr));
  	}
@@ -41,7 +41,7 @@ index ea4aff931a22..df01269b1954 100644
  	if (vtb[BRIDGE_VLANDB_GOPTS_MCAST_ROUTER_PORTS]) {
  		vattr = RTA_DATA(vtb[BRIDGE_VLANDB_GOPTS_MCAST_ROUTER_PORTS]);
 diff --git a/include/uapi/linux/if_bridge.h b/include/uapi/linux/if_bridge.h
-index c206cf6d9a1e..233248cf6446 100644
+index bed5e0c11218..5d0d40cb6d59 100644
 --- a/include/uapi/linux/if_bridge.h
 +++ b/include/uapi/linux/if_bridge.h
 @@ -584,6 +584,8 @@ enum {
@@ -54,10 +54,10 @@ index c206cf6d9a1e..233248cf6446 100644
  };
  #define BRIDGE_VLANDB_GOPTS_MAX (__BRIDGE_VLANDB_GOPTS_MAX - 1)
 diff --git a/include/uapi/linux/if_link.h b/include/uapi/linux/if_link.h
-index 79e97dd1fcdc..c92da69b6f82 100644
+index b450757c8d1f..3b022c8426e1 100644
 --- a/include/uapi/linux/if_link.h
 +++ b/include/uapi/linux/if_link.h
-@@ -791,6 +791,8 @@ enum {
+@@ -792,6 +792,8 @@ enum {
  	IFLA_BR_MCAST_QUERIER_STATE,
  	IFLA_BR_FDB_N_LEARNED,
  	IFLA_BR_FDB_MAX_LEARNED,
@@ -67,10 +67,10 @@ index 79e97dd1fcdc..c92da69b6f82 100644
  };
  
 diff --git a/ip/iplink_bridge.c b/ip/iplink_bridge.c
-index 1fe89551bced..5470e0a09a3c 100644
+index 76e6908675b7..5847e906fae2 100644
 --- a/ip/iplink_bridge.c
 +++ b/ip/iplink_bridge.c
-@@ -798,6 +798,18 @@ static void bridge_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
+@@ -765,6 +765,18 @@ static void bridge_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
  			   "mcast_mld_version %u ",
  			   rta_getattr_u8(tb[IFLA_BR_MCAST_MLD_VERSION]));
  
