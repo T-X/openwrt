@@ -1,7 +1,7 @@
-From bd2f3b93b18837cb654cd92bc10505e51c2c3a89 Mon Sep 17 00:00:00 2001
+From 06367ec485e966c52e5a4826d29a9f2244806878 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Tue, 26 Aug 2025 00:03:39 +0200
-Subject: [PATCH] net: bridge: mcast: add inactive state assertions
+Subject: [PATCH 14/16] net: bridge: mcast: add inactive state assertions
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -19,9 +19,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/bridge/br_multicast.c | 43 +++++++++++++++++++++++++++++++++++----
  1 file changed, 39 insertions(+), 4 deletions(-)
 
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index 20ad887335df..66445a398816 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
-@@ -1417,10 +1417,29 @@ static struct sk_buff *br_multicast_allo
+@@ -1418,10 +1418,29 @@ static struct sk_buff *br_multicast_alloc_query(struct net_bridge_mcast *brmctx,
  	return NULL;
  }
  
@@ -51,7 +53,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  struct net_bridge_mdb_entry *br_multicast_new_group(struct net_bridge *br,
-@@ -1890,9 +1909,7 @@ static void br_multicast_querier_expired
+@@ -1891,9 +1910,7 @@ static void br_multicast_querier_expired(struct net_bridge_mcast *brmctx,
  					 struct bridge_mcast_own_query *query,
  					 struct timer_list *timer)
  {
@@ -62,7 +64,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	    !br_opt_get(brmctx->br, BROPT_MULTICAST_ENABLED))
  		goto out;
  
-@@ -1903,7 +1920,6 @@ out:
+@@ -1904,7 +1921,6 @@ static void br_multicast_querier_expired(struct net_bridge_mcast *brmctx,
  	 * if our own querier is disabled, too
  	 */
  	br_multicast_update_active(brmctx);
@@ -70,7 +72,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  static void br_ip4_multicast_querier_expired(struct timer_list *t)
-@@ -1911,7 +1927,16 @@ static void br_ip4_multicast_querier_exp
+@@ -1912,7 +1928,16 @@ static void br_ip4_multicast_querier_expired(struct timer_list *t)
  	struct net_bridge_mcast *brmctx = from_timer(brmctx, t,
  						     ip4_other_query.timer);
  
@@ -87,7 +89,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  #if IS_ENABLED(CONFIG_IPV6)
-@@ -1920,7 +1945,16 @@ static void br_ip6_multicast_querier_exp
+@@ -1921,7 +1946,16 @@ static void br_ip6_multicast_querier_expired(struct timer_list *t)
  	struct net_bridge_mcast *brmctx = from_timer(brmctx, t,
  						     ip6_other_query.timer);
  
@@ -104,7 +106,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  #endif
  
-@@ -4491,6 +4525,7 @@ static void __br_multicast_stop(struct n
+@@ -4492,6 +4526,7 @@ static void __br_multicast_stop(struct net_bridge_mcast *brmctx)
  
  	/* bridge interface is down, set multicast state to inactive */
  	br_multicast_update_active(brmctx);
@@ -112,3 +114,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  void br_multicast_update_vlan_mcast_ctx(struct net_bridge_vlan *v, u8 state)
+-- 
+2.51.0
+

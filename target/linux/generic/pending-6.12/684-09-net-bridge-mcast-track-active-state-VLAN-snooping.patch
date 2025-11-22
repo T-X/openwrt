@@ -1,7 +1,7 @@
-From 62122db36532fdca0b1b1cab4288cde02d3d0ea3 Mon Sep 17 00:00:00 2001
+From 06928ecddc9fe680955c77b20fad2271d04ec3a9 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sat, 13 Sep 2025 10:06:29 +0200
-Subject: [PATCH] net: bridge: mcast: track active state, VLAN snooping
+Subject: [PATCH 09/16] net: bridge: mcast: track active state, VLAN snooping
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -16,9 +16,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/bridge/br_multicast.c | 20 ++++++++++++++++++++
  1 file changed, 20 insertions(+)
 
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index ef8a7566fb76..d6c3886d84f9 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
-@@ -1142,6 +1142,26 @@ static void br_multicast_update_active(s
+@@ -1143,6 +1143,26 @@ static void br_multicast_update_active(struct net_bridge_mcast *brmctx)
  	if (!br_opt_get(brmctx->br, BROPT_MULTICAST_ENABLED))
  		force_inactive = true;
  
@@ -45,3 +47,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	br_ip4_multicast_update_active(brmctx, force_inactive);
  	br_ip6_multicast_update_active(brmctx, force_inactive);
  
+-- 
+2.51.0
+

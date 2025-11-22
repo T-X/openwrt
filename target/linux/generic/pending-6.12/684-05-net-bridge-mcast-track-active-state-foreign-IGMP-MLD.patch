@@ -1,8 +1,8 @@
-From bd546c6db62d9ee1170d33e100490c4ef33b3317 Mon Sep 17 00:00:00 2001
+From 4b820719460aae9b64e3799a4ddd7b95d5ce6c97 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sat, 9 Aug 2025 07:50:12 +0200
-Subject: [PATCH] net: bridge: mcast: track active state, foreign IGMP/MLD
- querier disappearance
+Subject: [PATCH 05/16] net: bridge: mcast: track active state, foreign
+ IGMP/MLD querier disappearance
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -20,9 +20,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/bridge/br_multicast.c | 4 ++++
  1 file changed, 4 insertions(+)
 
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index 2c5bbd3c1029..a7db3cd198c2 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
-@@ -1825,6 +1825,10 @@ static void br_multicast_querier_expired
+@@ -1826,6 +1826,10 @@ static void br_multicast_querier_expired(struct net_bridge_mcast *brmctx,
  	br_multicast_start_querier(brmctx, query);
  
  out:
@@ -33,3 +35,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	spin_unlock(&brmctx->br->multicast_lock);
  }
  
+-- 
+2.51.0
+
