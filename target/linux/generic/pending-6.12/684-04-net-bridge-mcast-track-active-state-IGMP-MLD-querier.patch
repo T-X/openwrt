@@ -1,8 +1,8 @@
-From 470db7155b55810aa6284f30d2bd449e0ce455f6 Mon Sep 17 00:00:00 2001
+From 9b80b81b1915cba8b7dcc95effd32c1720dec8db Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sat, 9 Aug 2025 06:29:21 +0200
-Subject: [PATCH] net: bridge: mcast: track active state, IGMP/MLD querier
- appearance
+Subject: [PATCH 04/16] net: bridge: mcast: track active state, IGMP/MLD
+ querier appearance
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -27,13 +27,15 @@ No functional change for the fast/data path yet.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 ---
- net/bridge/br_multicast.c | 108 ++++++++++++++++++++++++++++++++++++--
+ net/bridge/br_multicast.c | 109 ++++++++++++++++++++++++++++++++++++--
  net/bridge/br_private.h   |   2 +
- 2 files changed, 107 insertions(+), 3 deletions(-)
+ 2 files changed, 108 insertions(+), 3 deletions(-)
 
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index 1cd2688f97cd..2c5bbd3c1029 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
-@@ -1069,6 +1069,80 @@ out:
+@@ -1069,6 +1069,81 @@ static struct sk_buff *br_ip4_multicast_alloc_query(struct net_bridge_mcast *brm
  	return skb;
  }
  
@@ -76,7 +78,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 +	    brmctx->ip6_active == ip6_active_old)
 +		return;
 +
-+	br_info(brmctx->br, "mc_active changed: v4: %i->%i, v6: %i->%i\n",
++	br_info(brmctx->br, "mc_active changed, vid: %i: v4: %i->%i, v6: %i->%i\n",
++		brmctx->vlan ? brmctx->vlan->vid : -1,
 +		ip4_active_old, brmctx->ip4_active,
 +		ip6_active_old, brmctx->ip6_active);
 +}
@@ -114,7 +117,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  #if IS_ENABLED(CONFIG_IPV6)
  static struct sk_buff *br_ip6_multicast_alloc_query(struct net_bridge_mcast *brmctx,
  						    struct net_bridge_mcast_port *pmctx,
-@@ -1772,10 +1846,36 @@ static void br_ip6_multicast_querier_exp
+@@ -1772,10 +1847,36 @@ static void br_ip6_multicast_querier_expired(struct timer_list *t)
  }
  #endif
  
@@ -152,7 +155,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  static void br_multicast_select_own_querier(struct net_bridge_mcast *brmctx,
  					    struct br_ip *ip,
  					    struct sk_buff *skb)
-@@ -4117,11 +4217,13 @@ void br_multicast_ctx_init(struct net_br
+@@ -4117,11 +4218,13 @@ void br_multicast_ctx_init(struct net_bridge *br,
  	brmctx->multicast_membership_interval = 260 * HZ;
  
  	brmctx->ip4_querier.port_ifidx = 0;
@@ -166,7 +169,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	seqcount_spinlock_init(&brmctx->ip6_querier.seq, &br->multicast_lock);
  #endif
  
-@@ -4234,12 +4336,12 @@ void br_multicast_reset_timer_cbs(struct
+@@ -4234,12 +4337,12 @@ void br_multicast_reset_timer_cbs(struct net_bridge_mcast *brmctx)
  
  	brmctx->ip4_mc_router_timer.function = br_ip4_multicast_local_router_expired;
  	brmctx->ip4_other_query.timer.function = br_ip4_multicast_querier_expired;
@@ -181,6 +184,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	brmctx->ip6_own_query.timer.function = br_ip6_multicast_query_expired;
  #endif
  }
+diff --git a/net/bridge/br_private.h b/net/bridge/br_private.h
+index ddc47d8ffb84..cf56a02c406e 100644
 --- a/net/bridge/br_private.h
 +++ b/net/bridge/br_private.h
 @@ -160,12 +160,14 @@ struct net_bridge_mcast {
@@ -198,3 +203,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  #endif /* IS_ENABLED(CONFIG_IPV6) */
  #endif /* CONFIG_BRIDGE_IGMP_SNOOPING */
  };
+-- 
+2.51.0
+

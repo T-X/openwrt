@@ -1,7 +1,8 @@
 From 88789e5930673f2646caaa70f60e9320a0412945 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sun, 13 Apr 2025 23:56:23 +0200
-Subject: [PATCH] net: bridge: mcast: export ip{4,6}_active state to netlink
+Subject: [PATCH 01/16] net: bridge: mcast: export ip{4,6}_active state to
+ netlink
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -19,6 +20,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/core/rtnetlink.c           |  2 +-
  6 files changed, 51 insertions(+), 5 deletions(-)
 
+diff --git a/include/uapi/linux/if_bridge.h b/include/uapi/linux/if_bridge.h
+index a5b743a2f775..fe26646c38c8 100644
 --- a/include/uapi/linux/if_bridge.h
 +++ b/include/uapi/linux/if_bridge.h
 @@ -584,6 +584,8 @@ enum {
@@ -30,6 +33,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	__BRIDGE_VLANDB_GOPTS_MAX
  };
  #define BRIDGE_VLANDB_GOPTS_MAX (__BRIDGE_VLANDB_GOPTS_MAX - 1)
+diff --git a/include/uapi/linux/if_link.h b/include/uapi/linux/if_link.h
+index 2acc7687e017..d73337c5a552 100644
 --- a/include/uapi/linux/if_link.h
 +++ b/include/uapi/linux/if_link.h
 @@ -740,6 +740,16 @@ enum in6_addr_gen_mode {
@@ -58,9 +63,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	__IFLA_BR_MAX,
  };
  
+diff --git a/net/bridge/br_netlink.c b/net/bridge/br_netlink.c
+index 6b97ae47f855..d583f2afa121 100644
 --- a/net/bridge/br_netlink.c
 +++ b/net/bridge/br_netlink.c
-@@ -1264,7 +1264,9 @@ static const struct nla_policy br_policy
+@@ -1264,7 +1264,9 @@ static const struct nla_policy br_policy[IFLA_BR_MAX + 1] = {
  	[IFLA_BR_VLAN_STATS_ENABLED] = { .type = NLA_U8 },
  	[IFLA_BR_MCAST_STATS_ENABLED] = { .type = NLA_U8 },
  	[IFLA_BR_MCAST_IGMP_VERSION] = { .type = NLA_U8 },
@@ -70,7 +77,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	[IFLA_BR_VLAN_STATS_PER_PORT] = { .type = NLA_U8 },
  	[IFLA_BR_MULTI_BOOLOPT] =
  		NLA_POLICY_EXACT_LEN(sizeof(struct br_boolopt_multi)),
-@@ -1623,7 +1625,9 @@ static size_t br_get_size(const struct n
+@@ -1623,7 +1625,9 @@ static size_t br_get_size(const struct net_device *brdev)
  	       nla_total_size_64bit(sizeof(u64)) + /* IFLA_BR_MCAST_QUERY_RESPONSE_INTVL */
  	       nla_total_size_64bit(sizeof(u64)) + /* IFLA_BR_MCAST_STARTUP_QUERY_INTVL */
  	       nla_total_size(sizeof(u8)) +	/* IFLA_BR_MCAST_IGMP_VERSION */
@@ -80,7 +87,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	       br_multicast_querier_state_size() + /* IFLA_BR_MCAST_QUERIER_STATE */
  #endif
  #if IS_ENABLED(CONFIG_BRIDGE_NETFILTER)
-@@ -1644,6 +1648,8 @@ static int br_fill_info(struct sk_buff *
+@@ -1644,6 +1648,8 @@ static int br_fill_info(struct sk_buff *skb, const struct net_device *brdev)
  	u32 ageing_time = jiffies_to_clock_t(br->ageing_time);
  	u32 stp_enabled = br->stp_enabled;
  	u16 priority = (br->bridge_id.prio[0] << 8) | br->bridge_id.prio[1];
@@ -89,7 +96,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	u8 vlan_enabled = br_vlan_enabled(br->dev);
  	struct br_boolopt_multi bm;
  	u64 clockval;
-@@ -1715,12 +1721,20 @@ static int br_fill_info(struct sk_buff *
+@@ -1715,12 +1721,20 @@ static int br_fill_info(struct sk_buff *skb, const struct net_device *brdev)
  			br->multicast_ctx.multicast_startup_query_count) ||
  	    nla_put_u8(skb, IFLA_BR_MCAST_IGMP_VERSION,
  		       br->multicast_ctx.multicast_igmp_version) ||
@@ -111,9 +118,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		return -EMSGSIZE;
  #endif
  	clockval = jiffies_to_clock_t(br->multicast_ctx.multicast_last_member_interval);
+diff --git a/net/bridge/br_private.h b/net/bridge/br_private.h
+index 5026a256bf92..731f1a9b2636 100644
 --- a/net/bridge/br_private.h
 +++ b/net/bridge/br_private.h
-@@ -1860,7 +1860,7 @@ int br_vlan_rtm_process_global_options(s
+@@ -1860,7 +1860,7 @@ int br_vlan_rtm_process_global_options(struct net_device *dev,
  bool br_vlan_global_opts_can_enter_range(const struct net_bridge_vlan *v_curr,
  					 const struct net_bridge_vlan *r_end);
  bool br_vlan_global_opts_fill(struct sk_buff *skb, u16 vid, u16 vid_range,
@@ -122,9 +131,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  
  /* vlan state manipulation helpers using *_ONCE to annotate lock-free access,
   * while br_vlan_set_state() may access data protected by multicast_lock.
+diff --git a/net/bridge/br_vlan_options.c b/net/bridge/br_vlan_options.c
+index 8fa89b04ee94..6425fa509b95 100644
 --- a/net/bridge/br_vlan_options.c
 +++ b/net/bridge/br_vlan_options.c
-@@ -347,8 +347,10 @@ bool br_vlan_global_opts_can_enter_range
+@@ -347,8 +347,10 @@ bool br_vlan_global_opts_can_enter_range(const struct net_bridge_vlan *v_curr,
  }
  
  bool br_vlan_global_opts_fill(struct sk_buff *skb, u16 vid, u16 vid_range,
@@ -136,7 +147,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	struct nlattr *nest2 __maybe_unused;
  	u64 clockval __maybe_unused;
  	struct nlattr *nest;
-@@ -369,6 +371,12 @@ bool br_vlan_global_opts_fill(struct sk_
+@@ -369,6 +371,12 @@ bool br_vlan_global_opts_fill(struct sk_buff *skb, u16 vid, u16 vid_range,
  		       !!(v_opts->priv_flags & BR_VLFLAG_GLOBAL_MCAST_ENABLED)) ||
  	    nla_put_u8(skb, BRIDGE_VLANDB_GOPTS_MCAST_IGMP_VERSION,
  		       v_opts->br_mcast_ctx.multicast_igmp_version) ||
@@ -149,7 +160,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	    nla_put_u32(skb, BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_CNT,
  			v_opts->br_mcast_ctx.multicast_last_member_count) ||
  	    nla_put_u32(skb, BRIDGE_VLANDB_GOPTS_MCAST_STARTUP_QUERY_CNT,
-@@ -423,7 +431,13 @@ bool br_vlan_global_opts_fill(struct sk_
+@@ -423,7 +431,13 @@ bool br_vlan_global_opts_fill(struct sk_buff *skb, u16 vid, u16 vid_range,
  
  #if IS_ENABLED(CONFIG_IPV6)
  	if (nla_put_u8(skb, BRIDGE_VLANDB_GOPTS_MCAST_MLD_VERSION,
@@ -164,7 +175,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		goto out_err;
  #endif
  #endif
-@@ -448,7 +462,9 @@ static size_t rtnl_vlan_global_opts_nlms
+@@ -448,7 +462,9 @@ static size_t rtnl_vlan_global_opts_nlmsg_size(const struct net_bridge_vlan *v)
  #ifdef CONFIG_BRIDGE_IGMP_SNOOPING
  		+ nla_total_size(sizeof(u8)) /* BRIDGE_VLANDB_GOPTS_MCAST_SNOOPING */
  		+ nla_total_size(sizeof(u8)) /* BRIDGE_VLANDB_GOPTS_MCAST_IGMP_VERSION */
@@ -174,7 +185,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		+ nla_total_size(sizeof(u32)) /* BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_CNT */
  		+ nla_total_size(sizeof(u32)) /* BRIDGE_VLANDB_GOPTS_MCAST_STARTUP_QUERY_CNT */
  		+ nla_total_size(sizeof(u64)) /* BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_INTVL */
-@@ -630,9 +646,11 @@ static const struct nla_policy br_vlan_d
+@@ -630,9 +646,11 @@ static const struct nla_policy br_vlan_db_gpol[BRIDGE_VLANDB_GOPTS_MAX + 1] = {
  	[BRIDGE_VLANDB_GOPTS_RANGE]	= { .type = NLA_U16 },
  	[BRIDGE_VLANDB_GOPTS_MCAST_SNOOPING]	= { .type = NLA_U8 },
  	[BRIDGE_VLANDB_GOPTS_MCAST_MLD_VERSION]	= { .type = NLA_U8 },
@@ -186,6 +197,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	[BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_CNT]	= { .type = NLA_U32 },
  	[BRIDGE_VLANDB_GOPTS_MCAST_STARTUP_QUERY_CNT]	= { .type = NLA_U32 },
  	[BRIDGE_VLANDB_GOPTS_MCAST_LAST_MEMBER_INTVL]	= { .type = NLA_U64 },
+diff --git a/net/core/rtnetlink.c b/net/core/rtnetlink.c
+index 650c3c20e79f..583dac63f18c 100644
 --- a/net/core/rtnetlink.c
 +++ b/net/core/rtnetlink.c
 @@ -61,7 +61,7 @@

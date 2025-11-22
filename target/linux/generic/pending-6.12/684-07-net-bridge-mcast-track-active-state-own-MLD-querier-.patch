@@ -1,7 +1,7 @@
-From 1196215539112cdb0e9326c72356b25120ba6602 Mon Sep 17 00:00:00 2001
+From 9c0fecdab7a569f542cedafb33e0a64e12c34b62 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sat, 9 Aug 2025 07:31:37 +0200
-Subject: [PATCH] net: bridge: mcast: track active state, own MLD querier
+Subject: [PATCH 07/16] net: bridge: mcast: track active state, own MLD querier
  disappearance
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -24,9 +24,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/bridge/br_multicast.c | 1 +
  1 file changed, 1 insertion(+)
 
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index 31dee8f5d0e2..180a7d628acf 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
-@@ -4897,6 +4897,7 @@ int br_multicast_set_querier(struct net_
+@@ -4898,6 +4898,7 @@ int br_multicast_set_querier(struct net_bridge_mcast *brmctx, unsigned long val)
  #endif
  
  unlock:
@@ -34,3 +36,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	spin_unlock_bh(&brmctx->br->multicast_lock);
  
  	return 0;
+-- 
+2.51.0
+

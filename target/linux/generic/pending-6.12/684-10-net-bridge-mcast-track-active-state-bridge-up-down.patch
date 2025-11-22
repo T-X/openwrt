@@ -1,7 +1,7 @@
-From ea3c41fa800c46da00f16d7296440cc0a97426a7 Mon Sep 17 00:00:00 2001
+From c1120ea8d8d362c745c74d3335ef63ad60417deb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sat, 9 Aug 2025 07:50:47 +0200
-Subject: [PATCH] net: bridge: mcast: track active state, bridge up/down
+Subject: [PATCH 10/16] net: bridge: mcast: track active state, bridge up/down
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -24,6 +24,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/bridge/br_multicast.c    | 10 ++++++++++
  2 files changed, 14 insertions(+), 4 deletions(-)
 
+diff --git a/include/uapi/linux/if_link.h b/include/uapi/linux/if_link.h
+index 88c13ecad4fa..585d9c239a47 100644
 --- a/include/uapi/linux/if_link.h
 +++ b/include/uapi/linux/if_link.h
 @@ -744,14 +744,14 @@ enum in6_addr_gen_mode {
@@ -45,9 +47,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
   */
  enum {
  	IFLA_BR_UNSPEC,
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index d6c3886d84f9..98ec5bd2d098 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
-@@ -1123,6 +1123,7 @@ static void br_multicast_notify_active(s
+@@ -1124,6 +1124,7 @@ static void br_multicast_notify_active(struct net_bridge_mcast *brmctx,
   *
   * The multicast active state is set, per protocol family, if:
   *
@@ -55,7 +59,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
   * - multicast snooping is enabled
   * - an IGMP/MLD querier is present
   * - for own IPv6 MLD querier: an IPv6 address is configured on the bridge
-@@ -1139,6 +1140,9 @@ static void br_multicast_update_active(s
+@@ -1140,6 +1141,9 @@ static void br_multicast_update_active(struct net_bridge_mcast *brmctx)
  
  	lockdep_assert_held_once(&brmctx->br->multicast_lock);
  
@@ -65,7 +69,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	if (!br_opt_get(brmctx->br, BROPT_MULTICAST_ENABLED))
  		force_inactive = true;
  
-@@ -4404,6 +4408,9 @@ static void __br_multicast_open(struct n
+@@ -4405,6 +4409,9 @@ static void __br_multicast_open(struct net_bridge_mcast *brmctx)
  #if IS_ENABLED(CONFIG_IPV6)
  	__br_multicast_open_query(brmctx->br, &brmctx->ip6_own_query);
  #endif
@@ -75,7 +79,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  void br_multicast_open(struct net_bridge *br)
-@@ -4444,6 +4451,9 @@ static void __br_multicast_stop(struct n
+@@ -4445,6 +4452,9 @@ static void __br_multicast_stop(struct net_bridge_mcast *brmctx)
  	timer_shutdown(&brmctx->ip6_other_query.delay_timer);
  	timer_shutdown(&brmctx->ip6_own_query.timer);
  #endif
@@ -85,3 +89,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  void br_multicast_update_vlan_mcast_ctx(struct net_bridge_vlan *v, u8 state)
+-- 
+2.51.0
+

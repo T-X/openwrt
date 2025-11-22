@@ -1,7 +1,8 @@
-From ea5a0678d447b9ef9ca0470868dc8bb83f11a050 Mon Sep 17 00:00:00 2001
+From de410144cf4df66a04de5a4f231c70506dee3dc0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Mon, 14 Apr 2025 00:06:32 +0200
-Subject: [PATCH] net: dsa: forward bridge/switchdev mcast active notification
+Subject: [PATCH 16/16] net: dsa: forward bridge/switchdev mcast active
+ notification
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -27,6 +28,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/dsa/user.c                       | 21 ++++++++++++++++++++-
  7 files changed, 79 insertions(+), 2 deletions(-)
 
+diff --git a/Documentation/networking/dsa/dsa.rst b/Documentation/networking/dsa/dsa.rst
+index 7b2e69cd7ef0..0b0be619be04 100644
 --- a/Documentation/networking/dsa/dsa.rst
 +++ b/Documentation/networking/dsa/dsa.rst
 @@ -1025,6 +1025,15 @@ Bridge VLAN filtering
@@ -45,9 +48,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  Link aggregation
  ----------------
  
+diff --git a/include/net/dsa.h b/include/net/dsa.h
+index 877f9b270cf6..d2313c54201b 100644
 --- a/include/net/dsa.h
 +++ b/include/net/dsa.h
-@@ -1097,6 +1097,11 @@ struct dsa_switch_ops {
+@@ -1095,6 +1095,11 @@ struct dsa_switch_ops {
  	int	(*port_mdb_del)(struct dsa_switch *ds, int port,
  				const struct switchdev_obj_port_mdb *mdb,
  				struct dsa_db db);
@@ -59,9 +64,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	/*
  	 * RXNFC
  	 */
+diff --git a/net/dsa/port.c b/net/dsa/port.c
+index 9c77c80e8fe9..cac411c7953f 100644
 --- a/net/dsa/port.c
 +++ b/net/dsa/port.c
-@@ -1290,6 +1290,25 @@ int dsa_port_bridge_host_mdb_del(const s
+@@ -1290,6 +1290,25 @@ int dsa_port_bridge_host_mdb_del(const struct dsa_port *dp,
  	return dsa_port_host_mdb_del(dp, mdb, db);
  }
  
@@ -87,9 +94,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  int dsa_port_vlan_add(struct dsa_port *dp,
  		      const struct switchdev_obj_port_vlan *vlan,
  		      struct netlink_ext_ack *extack)
+diff --git a/net/dsa/port.h b/net/dsa/port.h
+index 6bc3291573c0..0e92815e7de2 100644
 --- a/net/dsa/port.h
 +++ b/net/dsa/port.h
-@@ -75,6 +75,9 @@ int dsa_port_bridge_host_mdb_add(const s
+@@ -75,6 +75,9 @@ int dsa_port_bridge_host_mdb_add(const struct dsa_port *dp,
  				 const struct switchdev_obj_port_mdb *mdb);
  int dsa_port_bridge_host_mdb_del(const struct dsa_port *dp,
  				 const struct switchdev_obj_port_mdb *mdb);
@@ -99,9 +108,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  int dsa_port_pre_bridge_flags(const struct dsa_port *dp,
  			      struct switchdev_brport_flags flags,
  			      struct netlink_ext_ack *extack);
+diff --git a/net/dsa/switch.c b/net/dsa/switch.c
+index 3d2feeea897b..5b30dfe4bebd 100644
 --- a/net/dsa/switch.c
 +++ b/net/dsa/switch.c
-@@ -652,6 +652,16 @@ static int dsa_switch_host_mdb_del(struc
+@@ -652,6 +652,16 @@ static int dsa_switch_host_mdb_del(struct dsa_switch *ds,
  	return err;
  }
  
@@ -118,7 +129,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  /* Port VLANs match on the targeted port and on all DSA ports */
  static bool dsa_port_vlan_match(struct dsa_port *dp,
  				struct dsa_notifier_vlan_info *info)
-@@ -1026,6 +1036,9 @@ static int dsa_switch_event(struct notif
+@@ -1026,6 +1036,9 @@ static int dsa_switch_event(struct notifier_block *nb,
  	case DSA_NOTIFIER_HOST_MDB_DEL:
  		err = dsa_switch_host_mdb_del(ds, info);
  		break;
@@ -128,6 +139,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	case DSA_NOTIFIER_VLAN_ADD:
  		err = dsa_switch_vlan_add(ds, info);
  		break;
+diff --git a/net/dsa/switch.h b/net/dsa/switch.h
+index be0a2749cd97..69a5004e48c8 100644
 --- a/net/dsa/switch.h
 +++ b/net/dsa/switch.h
 @@ -24,6 +24,7 @@ enum {
@@ -161,9 +174,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  /* DSA_NOTIFIER_LAG_* */
  struct dsa_notifier_lag_info {
  	const struct dsa_port *dp;
+diff --git a/net/dsa/user.c b/net/dsa/user.c
+index 06267c526dc4..3583bc622188 100644
 --- a/net/dsa/user.c
 +++ b/net/dsa/user.c
-@@ -602,7 +602,7 @@ static int dsa_user_port_attr_set(struct
+@@ -602,7 +602,7 @@ static int dsa_user_port_attr_set(struct net_device *dev, const void *ctx,
  	struct dsa_port *dp = dsa_user_to_port(dev);
  	int ret;
  
@@ -172,7 +187,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		return 0;
  
  	switch (attr->id) {
-@@ -656,6 +656,15 @@ static int dsa_user_port_attr_set(struct
+@@ -656,6 +656,15 @@ static int dsa_user_port_attr_set(struct net_device *dev, const void *ctx,
  
  		ret = dsa_port_vlan_msti(dp, &attr->u.vlan_msti);
  		break;
@@ -188,7 +203,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	default:
  		ret = -EOPNOTSUPP;
  		break;
-@@ -3709,6 +3718,11 @@ static int dsa_user_switchdev_event(stru
+@@ -3709,6 +3718,11 @@ static int dsa_user_switchdev_event(struct notifier_block *unused,
  
  	switch (event) {
  	case SWITCHDEV_PORT_ATTR_SET:
@@ -200,7 +215,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		err = switchdev_handle_port_attr_set(dev, ptr,
  						     dsa_user_dev_check,
  						     dsa_user_port_attr_set);
-@@ -3747,6 +3761,11 @@ static int dsa_user_switchdev_blocking_e
+@@ -3747,6 +3761,11 @@ static int dsa_user_switchdev_blocking_event(struct notifier_block *unused,
  							    dsa_user_port_obj_del);
  		return notifier_from_errno(err);
  	case SWITCHDEV_PORT_ATTR_SET:
@@ -212,3 +227,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		err = switchdev_handle_port_attr_set(dev, ptr,
  						     dsa_user_dev_check,
  						     dsa_user_port_attr_set);
+-- 
+2.51.0
+
