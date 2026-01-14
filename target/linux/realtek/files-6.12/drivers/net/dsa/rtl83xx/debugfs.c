@@ -387,9 +387,16 @@ static int rtldsa_pmsks_table_show(struct seq_file *m, void *v)
 			   o[3], priv->r->read_mcast_pmask(i + 3), c[3]);
 	}
 
+	min_ports = priv->r->read_mcast_pmask(MC_PMASK_MIN_PORTS_IDX);
 	seq_printf(m, "MC_PMASK_MIN_PORTS (%i): 0x%016llx\n",
-		   MC_PMASK_MIN_PORTS_IDX,
-		   priv->r->read_mcast_pmask(MC_PMASK_MIN_PORTS_IDX));
+		   MC_PMASK_MIN_PORTS_IDX, min_ports);
+	if (min_ports) {
+		seq_printf(m, "* mc-min-ports: ");
+		for (int i = 0; i < sizeof(min_ports)*8; i++)
+			if (min_ports & BIT_ULL(i))
+				seq_printf(m, " %i", i);
+		seq_printf(m, "\n");
+	}
 
 	all_ports = priv->r->read_mcast_pmask(MC_PMASK_ALL_PORTS_IDX);
 	seq_printf(m, "MC_PMASK_ALL_PORTS (%i): 0x%016llx\n",
