@@ -363,6 +363,7 @@ static const struct file_operations l2_table_fops = {
 static int rtldsa_pmsks_table_show(struct seq_file *m, void *v)
 {
 	struct rtl838x_switch_priv *priv = m->private;
+	u64 all_ports;
 
 	mutex_lock(&priv->reg_mutex);
 
