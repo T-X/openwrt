@@ -1501,6 +1501,14 @@ static u64 rtldsa_mc_group_add_port(struct rtl838x_switch_priv *priv, int mc_gro
 static u64 rtldsa_mc_group_del_ports(struct rtl838x_switch_priv *priv,
 				     int mc_group, u64 portmask)
 {
+	/* Don't mess up our last two special port mask entries,
+	 * we use them for unsnoopable addresses, for instance.
+	 * "Fake" a now empty port mask though to allow/trigger the
+	 * deletion of the hash or cam entry.
+	 */
+	if (mc_group >= MAX_MC_GROUPS - 2)
+		return 0;
+
 	portmask = priv->r->read_mcast_pmask(mc_group) & ~portmask;
 
 	priv->r->write_mcast_pmask(mc_group, portmask);
