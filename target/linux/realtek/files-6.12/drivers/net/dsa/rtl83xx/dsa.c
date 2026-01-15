@@ -2823,7 +2823,7 @@ static int rtldsa_port_mdb_del(struct dsa_switch *ds, int port,
 out:
 	mutex_unlock(&priv->reg_mutex);
 
-	return err;
+	return 0;
 }
 
 static int rtldsa_port_mirror_add(struct dsa_switch *ds, int port,
