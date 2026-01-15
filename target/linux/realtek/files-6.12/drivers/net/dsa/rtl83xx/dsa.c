@@ -2861,6 +2861,17 @@ static int rtldsa_port_mdb_del(struct dsa_switch *ds, int port,
 
 	/* TODO: Re-enable with a newer kernel: err = -ENOENT; */
 
+	/* TODO/Note:
+	 * After switching from active to inactive we flush our entries
+	 * immediately. But the bridge layer does not flush its entries
+	 * and might send us notifications about timed out / deleted
+	 * entries later, leaving us here with an err = -ENOTSUPP,
+	 * because we had already deleted these entries here in the past.
+	 * As long as the bridge layer does not flush from its entries
+	 * before switching to inactive we therefore need to ignore
+	 * err = -ENOTSUPP here.
+	 */
+
 out:
 	mutex_unlock(&priv->reg_mutex);
 
