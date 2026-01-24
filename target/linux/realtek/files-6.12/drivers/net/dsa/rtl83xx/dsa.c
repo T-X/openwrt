@@ -28,7 +28,7 @@ static void rtldsa_init_counters(struct rtl838x_switch_priv *priv);
 static void rtldsa_port_xstp_state_set(struct rtl838x_switch_priv *priv, int port,
 				       u8 state, u16 mst_slot);
 
-static void rtl83xx_init_stats(struct rtl838x_switch_priv *priv)
+static void rtldsa_83xx_init_stats(struct rtl838x_switch_priv *priv)
 {
 	mutex_lock(&priv->reg_mutex);
 
@@ -544,7 +544,7 @@ static void rtldsa_port_set_salrn(struct rtl838x_switch_priv *priv,
 		    priv->r->l2_port_new_salrn(port));
 }
 
-static int rtl83xx_setup(struct dsa_switch *ds)
+static int rtldsa_83xx_setup(struct dsa_switch *ds)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 
@@ -581,7 +581,7 @@ static int rtl83xx_setup(struct dsa_switch *ds)
 	else
 		rtl839x_print_matrix();
 
-	rtl83xx_init_stats(priv);
+	rtldsa_83xx_init_stats(priv);
 	rtldsa_init_counters(priv);
 
 	rtl83xx_mc_pmasks_setup(priv);
@@ -614,7 +614,7 @@ static int rtl83xx_setup(struct dsa_switch *ds)
 	return 0;
 }
 
-static int rtl93xx_setup(struct dsa_switch *ds)
+static int rtldsa_93xx_setup(struct dsa_switch *ds)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 
@@ -729,9 +729,9 @@ static void rtldsa_93xx_phylink_get_caps(struct dsa_switch *ds, int port,
 	__set_bit(PHY_INTERFACE_MODE_10G_QXGMII, config->supported_interfaces);
 }
 
-static void rtl83xx_phylink_mac_config(struct dsa_switch *ds, int port,
-				       unsigned int mode,
-					const struct phylink_link_state *state)
+static void rtldsa_83xx_phylink_mac_config(struct dsa_switch *ds, int port,
+					   unsigned int mode,
+					   const struct phylink_link_state *state)
 {
 	struct dsa_port *dp = dsa_to_port(ds, port);
 	struct rtl838x_switch_priv *priv = ds->priv;
@@ -760,9 +760,9 @@ static void rtl83xx_phylink_mac_config(struct dsa_switch *ds, int port,
 	sw_w32(mcr, priv->r->mac_force_mode_ctrl(port));
 }
 
-static void rtl931x_phylink_mac_config(struct dsa_switch *ds, int port,
-				       unsigned int mode,
-					const struct phylink_link_state *state)
+static void rtldsa_931x_phylink_mac_config(struct dsa_switch *ds, int port,
+					   unsigned int mode,
+					   const struct phylink_link_state *state)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 	u32 reg;
@@ -776,9 +776,9 @@ static void rtl931x_phylink_mac_config(struct dsa_switch *ds, int port,
 	sw_w32(reg, priv->r->mac_force_mode_ctrl(port));
 }
 
-static void rtl93xx_phylink_mac_config(struct dsa_switch *ds, int port,
-				       unsigned int mode,
-					const struct phylink_link_state *state)
+static void rtldsa_93xx_phylink_mac_config(struct dsa_switch *ds, int port,
+					   unsigned int mode,
+					   const struct phylink_link_state *state)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 
@@ -787,15 +787,15 @@ static void rtl93xx_phylink_mac_config(struct dsa_switch *ds, int port,
 		return;
 
 	if (priv->family_id == RTL9310_FAMILY_ID)
-		return rtl931x_phylink_mac_config(ds, port, mode, state);
+		return rtldsa_931x_phylink_mac_config(ds, port, mode, state);
 
 	/* Disable MAC completely */
 	sw_w32(0, RTL930X_MAC_FORCE_MODE_CTRL + 4 * port);
 }
 
-static void rtl83xx_phylink_mac_link_down(struct dsa_switch *ds, int port,
-					  unsigned int mode,
-				     phy_interface_t interface)
+static void rtldsa_83xx_phylink_mac_link_down(struct dsa_switch *ds, int port,
+					      unsigned int mode,
+					      phy_interface_t interface)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 	int mask = 0;
@@ -808,9 +808,9 @@ static void rtl83xx_phylink_mac_link_down(struct dsa_switch *ds, int port,
 	sw_w32_mask(mask, 0, priv->r->mac_force_mode_ctrl(port));
 }
 
-static void rtl93xx_phylink_mac_link_down(struct dsa_switch *ds, int port,
-					  unsigned int mode,
-				     phy_interface_t interface)
+static void rtldsa_93xx_phylink_mac_link_down(struct dsa_switch *ds, int port,
+					      unsigned int mode,
+					      phy_interface_t interface)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 	u32 v = 0;
@@ -826,12 +826,12 @@ static void rtl93xx_phylink_mac_link_down(struct dsa_switch *ds, int port,
 	sw_w32_mask(v, 0, priv->r->mac_force_mode_ctrl(port));
 }
 
-static void rtl83xx_phylink_mac_link_up(struct dsa_switch *ds, int port,
-					unsigned int mode,
-				   phy_interface_t interface,
-				   struct phy_device *phydev,
-				   int speed, int duplex,
-				   bool tx_pause, bool rx_pause)
+static void rtldsa_83xx_phylink_mac_link_up(struct dsa_switch *ds, int port,
+					    unsigned int mode,
+					    phy_interface_t interface,
+					    struct phy_device *phydev,
+					    int speed, int duplex,
+					    bool tx_pause, bool rx_pause)
 {
 	struct dsa_port *dp = dsa_to_port(ds, port);
 	struct rtl838x_switch_priv *priv = ds->priv;
@@ -889,12 +889,12 @@ static void rtl83xx_phylink_mac_link_up(struct dsa_switch *ds, int port,
 	sw_w32_mask(0, 0x3, priv->r->mac_port_ctrl(port));
 }
 
-static void rtl93xx_phylink_mac_link_up(struct dsa_switch *ds, int port,
-					unsigned int mode,
-					phy_interface_t interface,
-					struct phy_device *phydev,
-					int speed, int duplex,
-					bool tx_pause, bool rx_pause)
+static void rtldsa_93xx_phylink_mac_link_up(struct dsa_switch *ds, int port,
+					    unsigned int mode,
+					    phy_interface_t interface,
+					    struct phy_device *phydev,
+					    int speed, int duplex,
+					    bool tx_pause, bool rx_pause)
 {
 	struct dsa_port *dp = dsa_to_port(ds, port);
 	struct rtl838x_switch_priv *priv = ds->priv;
@@ -1981,7 +1981,7 @@ unlock:
 	mutex_unlock(&priv->reg_mutex);
 }
 
-void rtl83xx_fast_age(struct dsa_switch *ds, int port)
+void rtldsa_83xx_fast_age(struct dsa_switch *ds, int port)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 	int s = priv->family_id == RTL8390_FAMILY_ID ? 2 : 0;
@@ -2026,7 +2026,7 @@ static void rtldsa_931x_fast_age(struct dsa_switch *ds, int port)
 	mutex_unlock(&priv->reg_mutex);
 }
 
-static void rtl930x_fast_age(struct dsa_switch *ds, int port)
+static void rtldsa_930x_fast_age(struct dsa_switch *ds, int port)
 {
 	struct rtl838x_switch_priv *priv = ds->priv;
 
@@ -3355,9 +3355,9 @@ static int rtldsa_port_bridge_flags(struct dsa_switch *ds, int port,
 	return 0;
 }
 
-static bool rtl83xx_lag_can_offload(struct dsa_switch *ds,
-				    struct net_device *lag,
-				    struct netdev_lag_upper_info *info)
+static bool rtldsa_83xx_lag_can_offload(struct dsa_switch *ds,
+					struct net_device *lag,
+					struct netdev_lag_upper_info *info)
 {
 	int id;
 
@@ -3392,7 +3392,7 @@ static int rtldsa_port_lag_join(struct dsa_switch *ds,
 	int err = 0;
 	int group;
 
-	if (!rtl83xx_lag_can_offload(ds, lag.dev, info))
+	if (!rtldsa_83xx_lag_can_offload(ds, lag.dev, info))
 		return -EOPNOTSUPP;
 
 	mutex_lock(&priv->reg_mutex);
@@ -3587,17 +3587,17 @@ unlock:
 	return ret;
 }
 
-const struct dsa_switch_ops rtl83xx_switch_ops = {
+const struct dsa_switch_ops rtldsa_83xx_switch_ops = {
 	.get_tag_protocol	= rtldsa_get_tag_protocol,
-	.setup			= rtl83xx_setup,
+	.setup			= rtldsa_83xx_setup,
 
 	.phy_read		= rtldsa_phy_read,
 	.phy_write		= rtldsa_phy_write,
 
 	.phylink_get_caps	= rtldsa_83xx_phylink_get_caps,
-	.phylink_mac_config	= rtl83xx_phylink_mac_config,
-	.phylink_mac_link_down	= rtl83xx_phylink_mac_link_down,
-	.phylink_mac_link_up	= rtl83xx_phylink_mac_link_up,
+	.phylink_mac_config	= rtldsa_83xx_phylink_mac_config,
+	.phylink_mac_link_down	= rtldsa_83xx_phylink_mac_link_down,
+	.phylink_mac_link_up	= rtldsa_83xx_phylink_mac_link_up,
 	.phylink_mac_select_pcs	= rtldsa_phylink_mac_select_pcs,
 
 	.get_strings		= rtldsa_get_strings,
@@ -3620,7 +3620,7 @@ const struct dsa_switch_ops rtl83xx_switch_ops = {
 	.port_bridge_join	= rtldsa_port_bridge_join,
 	.port_bridge_leave	= rtldsa_port_bridge_leave,
 	.port_stp_state_set	= rtldsa_port_stp_state_set,
-	.port_fast_age		= rtl83xx_fast_age,
+	.port_fast_age		= rtldsa_83xx_fast_age,
 	.port_mst_state_set	= rtldsa_port_mst_state_set,
 
 	.port_vlan_filtering	= rtldsa_vlan_filtering,
@@ -3648,17 +3648,17 @@ const struct dsa_switch_ops rtl83xx_switch_ops = {
 	.port_bridge_flags	= rtldsa_port_bridge_flags,
 };
 
-const struct dsa_switch_ops rtl93xx_switch_ops = {
+const struct dsa_switch_ops rtldsa_93xx_switch_ops = {
 	.get_tag_protocol	= rtldsa_get_tag_protocol,
-	.setup			= rtl93xx_setup,
+	.setup			= rtldsa_93xx_setup,
 
 	.phy_read		= rtldsa_phy_read,
 	.phy_write		= rtldsa_phy_write,
 
 	.phylink_get_caps	= rtldsa_93xx_phylink_get_caps,
-	.phylink_mac_config	= rtl93xx_phylink_mac_config,
-	.phylink_mac_link_down	= rtl93xx_phylink_mac_link_down,
-	.phylink_mac_link_up	= rtl93xx_phylink_mac_link_up,
+	.phylink_mac_config	= rtldsa_93xx_phylink_mac_config,
+	.phylink_mac_link_down	= rtldsa_93xx_phylink_mac_link_down,
+	.phylink_mac_link_up	= rtldsa_93xx_phylink_mac_link_up,
 	.phylink_mac_select_pcs	= rtldsa_phylink_mac_select_pcs,
 
 	.get_strings		= rtldsa_get_strings,
@@ -3681,7 +3681,7 @@ const struct dsa_switch_ops rtl93xx_switch_ops = {
 	.port_bridge_join	= rtldsa_port_bridge_join,
 	.port_bridge_leave	= rtldsa_port_bridge_leave,
 	.port_stp_state_set	= rtldsa_port_stp_state_set,
-	.port_fast_age		= rtl930x_fast_age,
+	.port_fast_age		= rtldsa_930x_fast_age,
 	.port_mst_state_set	= rtldsa_port_mst_state_set,
 
 	.port_vlan_filtering	= rtldsa_vlan_filtering,
