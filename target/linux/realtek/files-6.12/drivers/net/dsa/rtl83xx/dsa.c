@@ -448,7 +448,7 @@ static void rtldsa_vlan_set_pvid(struct rtl838x_switch_priv *priv,
 	priv->ports[port].pvid = pvid;
 }
 
-static void rtl83xx_mc_pmasks_setup(struct rtl838x_switch_priv *priv)
+static void rtldsa_83xx_mc_pmasks_setup(struct rtl838x_switch_priv *priv)
 {
 	u64 portmask = 0;
 
@@ -584,7 +584,7 @@ static int rtldsa_83xx_setup(struct dsa_switch *ds)
 	rtldsa_83xx_init_stats(priv);
 	rtldsa_init_counters(priv);
 
-	rtl83xx_mc_pmasks_setup(priv);
+	rtldsa_83xx_mc_pmasks_setup(priv);
 	rtldsa_vlan_setup(ds);
 
 	rtldsa_setup_bpdu_traps(priv);
@@ -3156,7 +3156,7 @@ rtldsa_port_mdb_update_unknown_ip_flood(struct rtl838x_switch_priv *priv)
 	switch (priv->family_id) {
 	case RTL8380_FAMILY_ID:
 	case RTL8390_FAMILY_ID:
-		rtl83xx_mc_pmasks_setup(priv);
+		rtldsa_83xx_mc_pmasks_setup(priv);
 		break;
 	case RTL9300_FAMILY_ID:
 	case RTL9310_FAMILY_ID:
