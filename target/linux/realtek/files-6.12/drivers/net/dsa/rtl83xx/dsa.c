@@ -459,14 +459,8 @@ void rtldsa_83xx_mc_pmasks_setup(struct rtl838x_switch_priv *priv)
 	priv->r->write_mcast_pmask(MC_PMASK_MIN_PORTS_IDX, priv->mc_router_portmask);
 }
 
-/* Initialize all VLANS */
-static void rtldsa_vlan_setup(struct dsa_switch *ds)
+void rtldsa_vlan_profiles_setup(struct rtl838x_switch_priv *priv)
 {
-	struct rtl838x_switch_priv *priv = ds->priv;
-	struct rtl838x_vlan_info info;
-
-	pr_info("In %s\n", __func__);
-
 	/* IGMP/MLD snooping disabled: */
 	priv->r->vlan_profile_setup(priv, 0);
 	/* IGMP snooping enabled, MLD snooping disabled: */
@@ -476,7 +470,17 @@ static void rtldsa_vlan_setup(struct dsa_switch *ds)
 	/* IGMP/MLD snooping enabled: */
 	priv->r->vlan_profile_setup(priv, RTLDSA_VLAN_PROFILE_MC_ACTIVE_V4 |
 					  RTLDSA_VLAN_PROFILE_MC_ACTIVE_V6);
+}
 
+/* Initialize all VLANS */
+static void rtldsa_vlan_setup(struct dsa_switch *ds)
+{
+	struct rtl838x_switch_priv *priv = ds->priv;
+	struct rtl838x_vlan_info info;
+
+	pr_info("In %s\n", __func__);
+
+	rtldsa_vlan_profiles_setup(priv);
 	priv->r->vlan_profile_dump(priv, 0);
 
 	info.fid = 0;			/* Default Forwarding ID / MSTI */
