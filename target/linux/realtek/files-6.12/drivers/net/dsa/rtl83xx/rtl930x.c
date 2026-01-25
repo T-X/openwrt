@@ -2715,6 +2715,7 @@ const struct rtl838x_reg rtl930x_reg = {
 	.l2_hash_key = rtl930x_l2_hash_key,
 	.read_mcast_pmask = rtl930x_read_mcast_pmask,
 	.write_mcast_pmask = rtl930x_write_mcast_pmask,
+	.update_mcast_unknown_ip_flood = rtldsa_vlan_profiles_setup,
 	.pie_init = rtl930x_pie_init,
 	.pie_rule_write = rtl930x_pie_rule_write,
 	.pie_rule_add = rtl930x_pie_rule_add,

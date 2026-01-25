@@ -1773,6 +1773,7 @@ const struct rtl838x_reg rtl838x_reg = {
 	.l2_hash_key = rtl838x_l2_hash_key,
 	.read_mcast_pmask = rtl838x_read_mcast_pmask,
 	.write_mcast_pmask = rtl838x_write_mcast_pmask,
+	.update_mcast_unknown_ip_flood = rtldsa_83xx_mc_pmasks_setup,
 	.pie_init = rtl838x_pie_init,
 	.pie_rule_read = rtl838x_pie_rule_read,
 	.pie_rule_write = rtl838x_pie_rule_write,

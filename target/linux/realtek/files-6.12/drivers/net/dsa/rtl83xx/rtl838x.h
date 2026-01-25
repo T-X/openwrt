@@ -1342,6 +1342,7 @@ struct rtl838x_reg {
 	u32 (*l2_hash_key)(struct rtl838x_switch_priv *priv, u64 seed);
 	u64 (*read_mcast_pmask)(int idx);
 	void (*write_mcast_pmask)(int idx, u64 portmask);
+	void (*update_mcast_unknown_ip_flood)(struct rtl838x_switch_priv *priv);
 	void (*vlan_fwd_on_inner)(int port, bool is_set);
 	void (*pie_init)(struct rtl838x_switch_priv *priv);
 	int (*pie_rule_read)(struct rtl838x_switch_priv *priv, int idx, struct  pie_rule *pr);

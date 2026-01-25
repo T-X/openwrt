@@ -3150,28 +3150,6 @@ static void rtldsa_mc_group_del_mrouter(struct rtl838x_switch_priv *priv, int po
 	rtldsa_port_mdb_snoop_flush_v6(priv, -1, portmask);
 }
 
-static void
-rtldsa_port_mdb_update_unknown_ip_flood(struct rtl838x_switch_priv *priv)
-{
-	switch (priv->family_id) {
-	case RTL8380_FAMILY_ID:
-	case RTL8390_FAMILY_ID:
-		rtldsa_83xx_mc_pmasks_setup(priv);
-		break;
-	case RTL9300_FAMILY_ID:
-	case RTL9310_FAMILY_ID:
-		priv->r->vlan_profile_setup(priv, RTLDSA_VLAN_PROFILE_MC_ACTIVE_V4);
-		priv->r->vlan_profile_setup(priv, RTLDSA_VLAN_PROFILE_MC_ACTIVE_V6);
-		priv->r->vlan_profile_setup(priv, RTLDSA_VLAN_PROFILE_MC_ACTIVE_V4 |
-						  RTLDSA_VLAN_PROFILE_MC_ACTIVE_V6);
-		break;
-	default:
-		dev_err(priv->dev, "%s: unknown family_id %u\n", __func__,
-			priv->family_id);
-		break;
-	}
-}
-
 static int
 rtldsa_port_mdb_set_mrouter(struct dsa_switch *ds, int port, bool mrouter,
 			    struct netlink_ext_ack *extack)
@@ -3186,7 +3164,7 @@ rtldsa_port_mdb_set_mrouter(struct dsa_switch *ds, int port, bool mrouter,
 		rtldsa_mc_group_del_mrouter(priv, port);
 
 	rtldsa_port_mdb_snoop_replay(priv);
-	rtldsa_port_mdb_update_unknown_ip_flood(priv);
+	priv->r->update_mcast_unknown_ip_flood(priv);
 
 	mutex_unlock(&priv->reg_mutex);
 
